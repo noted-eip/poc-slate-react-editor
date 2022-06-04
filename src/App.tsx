@@ -50,6 +50,16 @@ const App = () => {
         <div>
         <button onMouseDown={event => {
             event.preventDefault()
+            CustomEditor.toggleBigMark(editor) }}>
+              Big
+          </button>
+          <button onMouseDown={event => {
+            event.preventDefault()
+            CustomEditor.toggleRedMark(editor) }}>
+              Red
+          </button>
+        <button onMouseDown={event => {
+            event.preventDefault()
             CustomEditor.toggleUnderlineMark(editor) }}>
               Underline
           </button>
@@ -126,8 +136,10 @@ const Leaf = (props: RenderLeafProps) => {
       {...props.attributes}
       style={{
         fontWeight: props.leaf.bold ? 'bold' : 'normal',
+        fontSize: props.leaf.big ? 25 : 16,
         fontStyle: props.leaf.italic ? 'italic' : 'normal',
-        textDecorationLine: props.leaf.underline ? 'underline' : 'none'
+        textDecorationLine: props.leaf.underline ? 'underline' : 'none',
+        color: props.leaf.red ? 'red' : 'black'
       }}
     >
       {props.children}

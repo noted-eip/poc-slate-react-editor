@@ -1,6 +1,22 @@
 import { Editor, Text, Element, Transforms } from "slate"
 
 export const CustomEditor = {
+    isBigMarkActive(editor: Editor) {
+        const [match]: any = Editor.nodes(editor, {
+          match: n => Text.isText(n) && n.big === true,
+          universal: true,
+        })
+        return !!match
+      },
+
+    isRedMarkActive(editor: Editor) {
+        const [match]: any = Editor.nodes(editor, {
+          match: n => Text.isText(n) && n.red === true,
+          universal: true,
+        })
+        return !!match
+      },
+
     isUnderlineMarkActive(editor: Editor) {
         const [match]: any = Editor.nodes(editor, {
           match: n => Text.isText(n) && n.underline === true,
@@ -30,6 +46,24 @@ export const CustomEditor = {
         match: n => Element.isElement(n) && n.type === 'code',
       })
       return !!match
+    },
+
+    toggleBigMark(editor: Editor) {
+        const isActive = CustomEditor.isBigMarkActive(editor)
+        Transforms.setNodes(
+          editor,
+          { big: isActive ? undefined : true },
+          { match: n => Text.isText(n), split: true }
+        )
+      },
+
+    toggleRedMark(editor: Editor) {
+    const isActive = CustomEditor.isRedMarkActive(editor)
+    Transforms.setNodes(
+        editor,
+        { red: isActive ? undefined : true },
+        { match: n => Text.isText(n), split: true }
+    )
     },
 
     toggleUnderlineMark(editor: Editor) {
