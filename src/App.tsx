@@ -47,6 +47,18 @@ const initialValue: Descendant[] = [
 const App = () => {
   const editor = useMemo(() => withReact(createEditor()), [])
 
+  const initialValue = useMemo(
+    () => {
+      const content: string | null = localStorage.getItem('content');
+      return content ? JSON.parse(content) : 
+        [{
+          type: 'paragraph',
+          children: [{ text: 'A line of text in a paragraph.' }],
+        }]
+    }, []
+      
+  )
+
   const renderElement = useCallback((props: RenderElementProps) => {
       switch (props.element.type) {
           case 'code':
@@ -61,43 +73,54 @@ const App = () => {
   }, [])
 
   return (
-    <Slate editor={editor} value={initialValue}>
-      <div>
-        <button onMouseDown={event => {
-          event.preventDefault()
-          CustomEditor.toggleBoldMark(editor) }}>
-            Bold
-        </button>
-        <button onMouseDown={event => {
-          event.preventDefault()
-          CustomEditor.toggleCodeBlock(editor) }}>
-            Code
-        </button>
-      </div>
-      <Editable
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        onKeyDown={event => {
-          if (!event.ctrlKey) {
-            return
-          }
-
-          // Replace the `onKeyDown` logic with our new commands.
-          switch (event.key) {
-            case '`': {
-              event.preventDefault()
-              CustomEditor.toggleCodeBlock(editor)
-              break
+    <Slate
+      editor={editor}
+      value={initialValue}
+      onChange={value => {
+        const isAstChange = editor.operations.some(
+          op => 'set_selection' !== op.type
+        )
+        if (isAstChange) {
+          const content = JSON.stringify(value)
+          localStorage.setItem('content', content)
+        }
+      }}>
+        <div>
+          <button onMouseDown={event => {
+            event.preventDefault()
+            CustomEditor.toggleBoldMark(editor) }}>
+              Bold
+          </button>
+          <button onMouseDown={event => {
+            event.preventDefault()
+            CustomEditor.toggleCodeBlock(editor) }}>
+              Code
+          </button>
+        </div>
+        <Editable
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          onKeyDown={event => {
+            if (!event.ctrlKey) {
+              return
             }
 
-            case 'b': {
-              event.preventDefault()
-              CustomEditor.toggleBoldMark(editor)
-              break
+            // Replace the `onKeyDown` logic with our new commands.
+            switch (event.key) {
+              case '`': {
+                event.preventDefault()
+                CustomEditor.toggleCodeBlock(editor)
+                break
+              }
+
+              case 'b': {
+                event.preventDefault()
+                CustomEditor.toggleBoldMark(editor)
+                break
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
     </Slate>
   )
 }
