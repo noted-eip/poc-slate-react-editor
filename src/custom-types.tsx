@@ -16,13 +16,22 @@ export type HeadingElement = {
   children: CustomText[]
 }
 
-export type CustomElement = ParagraphElement | HeadingElement
+export type CodeElement = {
+  type: 'code'
+  children: CustomText[]
+}
+
+export type CustomElement = ParagraphElement | HeadingElement | CodeElement
 
 export type FormattedText = { text: string; bold?: true }
 
 export type CustomText = FormattedText
 
+export type CustomNode = Node | CustomElement
+
 declare module 'slate' {
+  // only possible to extend Editor, Element and Text
+  // experimental for Selection, Range, and Point
   interface CustomTypes {
     Editor: CustomEditor
     Element: CustomElement
