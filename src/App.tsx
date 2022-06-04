@@ -1,43 +1,9 @@
 import React, { useCallback, useMemo } from 'react'
-import { Text, Element, createEditor, Descendant, Editor, Transforms } from 'slate'
+import { createEditor, Descendant } from 'slate'
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps } from 'slate-react'
+import { CustomEditor } from './editor'
 
-const CustomEditor = {
-  isBoldMarkActive(editor: Editor) {
-    const [match]: any = Editor.nodes(editor, {
-      match: n => Text.isText(n) && n.bold === true,
-      universal: true,
-    })
-    return !!match
-  },
-
-  isCodeBlockActive(editor: Editor) {
-    const [match]: any = Editor.nodes(editor, {
-      match: n => Element.isElement(n) && n.type === 'code',
-    })
-    return !!match
-  },
-
-  toggleBoldMark(editor: Editor) {
-    const isActive = CustomEditor.isBoldMarkActive(editor)
-    Transforms.setNodes(
-      editor,
-      { bold: isActive ? undefined : true },
-      { match: n => Text.isText(n), split: true }
-    )
-  },
-
-  toggleCodeBlock(editor: Editor) {
-    const isActive = CustomEditor.isCodeBlockActive(editor)
-    Transforms.setNodes(
-      editor,
-      { type: isActive ? undefined : 'code' },
-      { match: n => Editor.isBlock(editor, n) }
-    )
-  },
-}
-
-const initialValue: Descendant[] = [
+const placeholder: Descendant[] = [
   {
     type: 'paragraph',
     children: [{ text: 'A line of text in a paragraph.' }],
@@ -50,11 +16,7 @@ const App = () => {
   const initialValue = useMemo(
     () => {
       const content: string | null = localStorage.getItem('content');
-      return content ? JSON.parse(content) : 
-        [{
-          type: 'paragraph',
-          children: [{ text: 'A line of text in a paragraph.' }],
-        }]
+      return content ? JSON.parse(content) : placeholder;
     }, []
       
   )
@@ -86,6 +48,16 @@ const App = () => {
         }
       }}>
         <div>
+        <button onMouseDown={event => {
+            event.preventDefault()
+            CustomEditor.toggleUnderlineMark(editor) }}>
+              Underline
+          </button>
+        <button onMouseDown={event => {
+            event.preventDefault()
+            CustomEditor.toggleItalicMark(editor) }}>
+              Italic
+          </button>
           <button onMouseDown={event => {
             event.preventDefault()
             CustomEditor.toggleBoldMark(editor) }}>
@@ -110,6 +82,17 @@ const App = () => {
               case '`': {
                 event.preventDefault()
                 CustomEditor.toggleCodeBlock(editor)
+                break
+              }
+              case 'u': {
+                event.preventDefault()
+                CustomEditor.toggleUnderlineMark(editor)
+                break
+              }
+
+              case 'i': {
+                event.preventDefault()
+                CustomEditor.toggleItalicMark(editor)
                 break
               }
 
@@ -141,7 +124,11 @@ const Leaf = (props: RenderLeafProps) => {
   return (
     <span
       {...props.attributes}
-      style={{ fontWeight: props.leaf.bold ? 'bold' : 'normal' }}
+      style={{
+        fontWeight: props.leaf.bold ? 'bold' : 'normal',
+        fontStyle: props.leaf.italic ? 'italic' : 'normal',
+        textDecorationLine: props.leaf.underline ? 'underline' : 'none'
+      }}
     >
       {props.children}
     </span>

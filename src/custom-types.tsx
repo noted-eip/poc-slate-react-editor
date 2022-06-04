@@ -2,6 +2,7 @@
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
+import { CustomEditor } from './editor'
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
@@ -23,15 +24,15 @@ export type CodeElement = {
 
 export type CustomElement = ParagraphElement | HeadingElement | CodeElement
 
-export type FormattedText = { text: string; bold?: true }
+export type FormattedText = { text: string; bold?: true; italic?: true; underline?: true }
 
 export type CustomText = FormattedText
 
 export type CustomNode = Node | CustomElement
 
+// only possible to extend Editor, Element and Text
+// experimental for Selection, Range, and Point
 declare module 'slate' {
-  // only possible to extend Editor, Element and Text
-  // experimental for Selection, Range, and Point
   interface CustomTypes {
     Editor: CustomEditor
     Element: CustomElement
