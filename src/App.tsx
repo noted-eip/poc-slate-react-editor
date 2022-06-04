@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from 'react'
 import { Text, Element, createEditor, Descendant, Editor, Transforms } from 'slate'
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps } from 'slate-react'
 
-// Define our own custom set of helpers.
 const CustomEditor = {
   isBoldMarkActive(editor: Editor) {
     const [match]: any = Editor.nodes(editor, {
@@ -127,50 +126,3 @@ const Leaf = (props: RenderLeafProps) => {
 }
 
 export default App;
-
-
-// const App = () => {
-//   const editor = useMemo(() => withReact(createEditor()), [])
-
-//   const renderElement = useCallback(props => {
-//     switch (props.element.type) {
-//       case 'code':
-//         return <CodeElement {...props} />
-//       default:
-//         return <DefaultElement {...props} />
-//     }
-//   }, [])
-
-//   const renderLeaf = useCallback(props => {
-//     return <Leaf {...props} />
-//   }, [])
-
-//   return (
-//     <Slate editor={editor} value={initialValue}>
-//       <Editable
-//         renderElement={renderElement}
-//         renderLeaf={renderLeaf}
-//         onKeyDown={event => {
-//           if (!event.ctrlKey) {
-//             return
-//           }
-
-//           // Replace the `onKeyDown` logic with our new commands.
-//           switch (event.key) {
-//             case '`': {
-//               event.preventDefault()
-//               CustomEditor.toggleCodeBlock(editor)
-//               break
-//             }
-
-//             case 'b': {
-//               event.preventDefault()
-//               CustomEditor.toggleBoldMark(editor)
-//               break
-//             }
-//           }
-//         }}
-//       />
-//     </Slate>
-//   )
-// }
