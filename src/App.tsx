@@ -2,6 +2,42 @@ import React, { useCallback, useMemo } from 'react'
 import { Text, Element, createEditor, Descendant, Editor, Transforms } from 'slate'
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps } from 'slate-react'
 
+// Define our own custom set of helpers.
+const CustomEditor = {
+  isBoldMarkActive(editor: Editor) {
+    const [match]: any = Editor.nodes(editor, {
+      match: n => Text.isText(n) && n.bold === true,
+      universal: true,
+    })
+    return !!match
+  },
+
+  isCodeBlockActive(editor: Editor) {
+    const [match]: any = Editor.nodes(editor, {
+      match: n => Element.isElement(n) && n.type === 'code',
+    })
+    return !!match
+  },
+
+  toggleBoldMark(editor: Editor) {
+    const isActive = CustomEditor.isBoldMarkActive(editor)
+    Transforms.setNodes(
+      editor,
+      { bold: isActive ? undefined : true },
+      { match: n => Text.isText(n), split: true }
+    )
+  },
+
+  toggleCodeBlock(editor: Editor) {
+    const isActive = CustomEditor.isCodeBlockActive(editor)
+    Transforms.setNodes(
+      editor,
+      { type: isActive ? undefined : 'code' },
+      { match: n => Editor.isBlock(editor, n) }
+    )
+  },
+}
+
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
@@ -27,44 +63,42 @@ const App = () => {
 
   return (
     <Slate editor={editor} value={initialValue}>
-        <Editable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          onKeyDown={event => {
-            if (!event.ctrlKey) {
-              return
+      <div>
+        <button onMouseDown={event => {
+          event.preventDefault()
+          CustomEditor.toggleBoldMark(editor) }}>
+            Bold
+        </button>
+        <button onMouseDown={event => {
+          event.preventDefault()
+          CustomEditor.toggleCodeBlock(editor) }}>
+            Code
+        </button>
+      </div>
+      <Editable
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        onKeyDown={event => {
+          if (!event.ctrlKey) {
+            return
+          }
+
+          // Replace the `onKeyDown` logic with our new commands.
+          switch (event.key) {
+            case '`': {
+              event.preventDefault()
+              CustomEditor.toggleCodeBlock(editor)
+              break
             }
-  
-            switch (event.key) {
-              case '`': {
-                event.preventDefault()
-                const [match]: any = Editor.nodes(editor, {
-                  match: n => Element.isElement(n) && n.type === 'code'
-                })
-                
-                Transforms.setNodes(
-                  editor,
-                  { type: match ? 'paragraph' : 'code' },
-                  { match: n => Editor.isBlock(editor, n) }
-                )
-                break
-              }
-  
-              case 'b': {
-                event.preventDefault()
-                const [match]: any = Editor.nodes(editor, {
-                  match: n => Text.isText(n) && n.bold === true
-                })
-                Transforms.setNodes(
-                  editor,
-                  { bold: match ? undefined : true },
-                  { match: n => Text.isText(n), split: true }
-                )
-                break
-              }
+
+            case 'b': {
+              event.preventDefault()
+              CustomEditor.toggleBoldMark(editor)
+              break
             }
-          }}
-        />
+          }
+        }}
+      />
     </Slate>
   )
 }
@@ -94,3 +128,49 @@ const Leaf = (props: RenderLeafProps) => {
 
 export default App;
 
+
+// const App = () => {
+//   const editor = useMemo(() => withReact(createEditor()), [])
+
+//   const renderElement = useCallback(props => {
+//     switch (props.element.type) {
+//       case 'code':
+//         return <CodeElement {...props} />
+//       default:
+//         return <DefaultElement {...props} />
+//     }
+//   }, [])
+
+//   const renderLeaf = useCallback(props => {
+//     return <Leaf {...props} />
+//   }, [])
+
+//   return (
+//     <Slate editor={editor} value={initialValue}>
+//       <Editable
+//         renderElement={renderElement}
+//         renderLeaf={renderLeaf}
+//         onKeyDown={event => {
+//           if (!event.ctrlKey) {
+//             return
+//           }
+
+//           // Replace the `onKeyDown` logic with our new commands.
+//           switch (event.key) {
+//             case '`': {
+//               event.preventDefault()
+//               CustomEditor.toggleCodeBlock(editor)
+//               break
+//             }
+
+//             case 'b': {
+//               event.preventDefault()
+//               CustomEditor.toggleBoldMark(editor)
+//               break
+//             }
+//           }
+//         }}
+//       />
+//     </Slate>
+//   )
+// }
